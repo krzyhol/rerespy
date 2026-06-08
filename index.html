@@ -227,7 +227,7 @@
       background: var(--surface);
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 20px;
+      overflow: hidden;
       cursor: pointer;
       transition: box-shadow .15s, transform .15s, border-color .15s;
     }
@@ -236,6 +236,11 @@
       transform: translateY(-2px);
       border-color: #d9d3cb;
     }
+    .card-illustration { display: block; width: 100%; height: 152px; overflow: hidden; }
+    .card-illustration svg { width: 100%; height: 100%; display: block; }
+    .card-body { padding: 16px; }
+    .modal-illustration { width: 100%; height: 220px; overflow: hidden; }
+    .modal-illustration svg { width: 100%; height: 100%; display: block; }
     .card-slot {
       display: inline-flex;
       align-items: center;
@@ -534,6 +539,7 @@
 <!-- MODAL -->
 <div class="modal-overlay" id="modal-overlay">
   <div class="modal" id="modal">
+    <div class="modal-illustration" id="modal-illustration"></div>
     <div class="modal-header">
       <div class="modal-title-block">
         <div class="modal-slot" id="modal-slot"></div>
@@ -554,6 +560,396 @@ const slotNames = {
   1: 'Posilek 1', 2: 'Posilek 2', 3: 'Posilek 3',
   4: 'Posilek 4', 5: 'Posilek 5', 6: 'Posilek 6'
 };
+
+// ── SVG ILLUSTRATIONS ─────────────────────────────────────────────────────────
+function S(bg, body) {
+  return `<svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg"><rect width="280" height="220" fill="${bg}"/>${body}</svg>`;
+}
+
+const SVG = {
+  pizza: S('#FFF3E0',`
+    <circle cx="140" cy="115" r="82" fill="#D4622A"/>
+    <circle cx="140" cy="115" r="74" fill="#EF4444"/>
+    <circle cx="140" cy="115" r="65" fill="#FDE68A"/>
+    <line x1="140" y1="33" x2="140" y2="115" stroke="#D4622A" stroke-width="2.5"/>
+    <line x1="69" y1="156" x2="140" y2="115" stroke="#D4622A" stroke-width="2.5"/>
+    <line x1="211" y1="156" x2="140" y2="115" stroke="#D4622A" stroke-width="2.5"/>
+    <circle cx="118" cy="92" r="8" fill="#EF4444"/>
+    <circle cx="162" cy="98" r="8" fill="#EF4444"/>
+    <circle cx="130" cy="130" r="8" fill="#EF4444"/>
+    <circle cx="162" cy="130" r="7" fill="#16A34A"/>
+    <circle cx="115" cy="118" r="6" fill="#16A34A"/>`),
+
+  makaron: S('#FFFBEB',`
+    <path d="M58 130 Q58 188 140 188 Q222 188 222 130 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="130" rx="82" ry="24" fill="#FCD34D"/>
+    <path d="M88 112 Q108 88 128 112 Q148 136 168 112 Q188 88 208 112" stroke="#C8854A" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <path d="M88 130 Q108 106 128 130 Q148 154 168 130 Q188 106 208 130" stroke="#C8854A" stroke-width="7" stroke-linecap="round" fill="none"/>
+    <circle cx="118" cy="100" r="12" fill="#EF4444" opacity=".85"/>
+    <circle cx="162" cy="94" r="10" fill="#EF4444" opacity=".85"/>
+    <circle cx="185" cy="114" r="9" fill="#EF4444" opacity=".8"/>
+    <ellipse cx="140" cy="75" rx="12" ry="6" fill="#16A34A" transform="rotate(-20 140 75)"/>`),
+
+  kurczak: S('#FFF7ED',`
+    <ellipse cx="140" cy="145" rx="75" ry="48" fill="#D97706"/>
+    <ellipse cx="140" cy="138" rx="68" ry="46" fill="#F59E0B"/>
+    <rect x="122" y="60" width="36" height="72" rx="18" fill="#E5E7EB"/>
+    <ellipse cx="140" cy="62" rx="26" ry="18" fill="#F3F4F6"/>
+    <ellipse cx="140" cy="140" rx="56" ry="38" fill="#FCD34D"/>
+    <path d="M108 126 Q122 118 136 126" stroke="#92400E" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M144 126 Q158 118 172 126" stroke="#92400E" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <path d="M116 148 Q130 140 144 148" stroke="#92400E" stroke-width="4" stroke-linecap="round" fill="none"/>`),
+
+  ryba: S('#EFF6FF',`
+    <ellipse cx="135" cy="168" rx="98" ry="26" fill="#DBEAFE"/>
+    <ellipse cx="135" cy="164" rx="92" ry="22" fill="#EFF6FF"/>
+    <path d="M55 118 Q90 80 148 100 Q178 112 195 118 L172 126 Q158 158 108 144 Q58 130 55 118 Z" fill="#93C5FD"/>
+    <path d="M195 118 L232 92 L232 144 Z" fill="#60A5FA"/>
+    <path d="M66 120 Q90 90 142 108 Q168 118 170 124 Q148 148 108 140 Q66 130 66 120 Z" fill="#BFDBFE"/>
+    <path d="M108 102 Q114 96 120 102" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+    <path d="M124 108 Q130 102 136 108" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+    <path d="M140 102 Q146 96 152 102" stroke="#3B82F6" stroke-width="2.5" fill="none"/>
+    <circle cx="178" cy="112" r="9" fill="white"/>
+    <circle cx="180" cy="112" r="5" fill="#1E3A5F"/>
+    <circle cx="88" cy="158" r="16" fill="#FDE68A" stroke="#FCD34D" stroke-width="3"/>
+    <path d="M88 142 L88 174 M73 158 L103 158" stroke="#FCD34D" stroke-width="2"/>
+    <ellipse cx="118" cy="160" rx="14" ry="7" fill="#16A34A" transform="rotate(-20 118 160)"/>
+    <ellipse cx="140" cy="158" rx="12" ry="6" fill="#22C55E" transform="rotate(15 140 158)"/>`),
+
+  jajka: S('#FFFBEB',`
+    <ellipse cx="140" cy="170" rx="104" ry="30" fill="#374151"/>
+    <ellipse cx="140" cy="162" rx="98" ry="28" fill="#4B5563"/>
+    <rect x="224" y="150" width="72" height="20" rx="10" fill="#374151"/>
+    <ellipse cx="108" cy="132" rx="46" ry="28" fill="white"/>
+    <ellipse cx="172" cy="136" rx="40" ry="26" fill="white"/>
+    <circle cx="108" cy="130" r="19" fill="#FBBF24"/>
+    <circle cx="172" cy="134" r="17" fill="#F59E0B"/>
+    <circle cx="103" cy="124" r="7" fill="#FDE68A"/>
+    <circle cx="167" cy="128" r="6" fill="#FDE68A"/>`),
+
+  omlet: S('#FFFBEB',`
+    <ellipse cx="140" cy="168" rx="104" ry="28" fill="#E5E7EB"/>
+    <ellipse cx="140" cy="160" rx="98" ry="26" fill="#F3F4F6"/>
+    <path d="M62 132 Q65 96 140 92 Q215 96 218 132 Q222 162 140 168 Q58 162 62 132 Z" fill="#FDE68A"/>
+    <path d="M72 130 Q76 102 140 99 Q204 102 208 130 Q210 158 140 162 Q70 158 72 130 Z" fill="#FCD34D"/>
+    <ellipse cx="118" cy="128" rx="20" ry="12" fill="#FECACA" transform="rotate(-10 118 128)"/>
+    <ellipse cx="162" cy="124" rx="18" ry="11" fill="#86EFAC" transform="rotate(15 162 124)"/>
+    <circle cx="140" cy="134" r="9" fill="#EF4444" opacity=".7"/>
+    <circle cx="112" cy="114" r="5" fill="#16A34A"/>
+    <circle cx="128" cy="108" r="4" fill="#16A34A"/>
+    <circle cx="162" cy="112" r="5" fill="#16A34A"/>`),
+
+  owsianka: S('#FFFBEB',`
+    <path d="M62 128 Q62 192 140 192 Q218 192 218 128 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="128" rx="78" ry="22" fill="#F59E0B"/>
+    <ellipse cx="140" cy="128" rx="68" ry="17" fill="#FEF3C7"/>
+    <ellipse cx="110" cy="116" rx="12" ry="7" fill="#FCD34D" transform="rotate(-20 110 116)"/>
+    <ellipse cx="130" cy="108" rx="11" ry="6" fill="#FDE68A" transform="rotate(10 130 108)"/>
+    <ellipse cx="152" cy="112" rx="12" ry="7" fill="#FCD34D" transform="rotate(25 152 112)"/>
+    <ellipse cx="118" cy="124" rx="11" ry="6" fill="#FDE68A" transform="rotate(-10 118 124)"/>
+    <ellipse cx="148" cy="122" rx="12" ry="7" fill="#FCD34D" transform="rotate(15 148 122)"/>
+    <circle cx="110" cy="98" r="10" fill="#7C3AED"/>
+    <circle cx="128" cy="90" r="9" fill="#EF4444"/>
+    <circle cx="148" cy="92" r="10" fill="#7C3AED"/>
+    <circle cx="166" cy="100" r="9" fill="#EF4444"/>`),
+
+  sałatka: S('#F0FDF4',`
+    <path d="M60 124 Q60 190 140 190 Q220 190 220 124 Z" fill="#86EFAC"/>
+    <ellipse cx="140" cy="124" rx="80" ry="24" fill="#4ADE80"/>
+    <ellipse cx="108" cy="110" rx="26" ry="15" fill="#16A34A" transform="rotate(-20 108 110)"/>
+    <ellipse cx="140" cy="98" rx="24" ry="14" fill="#22C55E" transform="rotate(10 140 98)"/>
+    <ellipse cx="172" cy="108" rx="26" ry="15" fill="#15803D" transform="rotate(25 172 108)"/>
+    <ellipse cx="120" cy="118" rx="22" ry="12" fill="#16A34A" transform="rotate(-15 120 118)"/>
+    <ellipse cx="158" cy="116" rx="20" ry="11" fill="#4ADE80" transform="rotate(20 158 116)"/>
+    <circle cx="112" cy="104" r="9" fill="#EF4444"/>
+    <circle cx="150" cy="96" r="8" fill="#EF4444"/>
+    <circle cx="168" cy="112" r="7" fill="#FCD34D"/>
+    <circle cx="132" cy="112" r="7" fill="#FCD34D"/>`),
+
+  zupa: S('#FFF7ED',`
+    <path d="M64 128 Q64 194 140 194 Q216 194 216 128 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="128" rx="76" ry="22" fill="#F59E0B"/>
+    <path d="M68 132 Q68 188 140 188 Q212 188 212 132 Z" fill="#FBBF24" opacity=".7"/>
+    <circle cx="108" cy="156" r="15" fill="#EF4444" opacity=".9"/>
+    <circle cx="140" cy="162" r="14" fill="#16A34A" opacity=".9"/>
+    <circle cx="172" cy="154" r="12" fill="#EF4444" opacity=".9"/>
+    <ellipse cx="126" cy="142" rx="12" ry="7" fill="#FCD34D"/>
+    <ellipse cx="158" cy="144" rx="11" ry="6" fill="#FCD34D"/>
+    <path d="M108 108 Q104 92 108 76 Q112 60 108 44" stroke="#D97706" stroke-width="4" stroke-linecap="round" fill="none" opacity=".5"/>
+    <path d="M140 104 Q136 88 140 72 Q144 56 140 40" stroke="#D97706" stroke-width="4" stroke-linecap="round" fill="none" opacity=".5"/>
+    <path d="M172 108 Q168 92 172 76 Q176 60 172 44" stroke="#D97706" stroke-width="4" stroke-linecap="round" fill="none" opacity=".5"/>`),
+
+  kanapki: S('#FFFBEB',`
+    <rect x="52" y="162" width="176" height="32" rx="16" fill="#D97706"/>
+    <rect x="55" y="142" width="170" height="22" rx="6" fill="#86EFAC"/>
+    <rect x="55" y="122" width="170" height="21" rx="5" fill="#FECACA"/>
+    <rect x="55" y="104" width="170" height="19" rx="5" fill="#FDE68A"/>
+    <path d="M52 102 Q52 72 140 72 Q228 72 228 102 L228 106 L52 106 Z" fill="#F59E0B"/>
+    <path d="M58 102 Q58 80 140 80 Q222 80 222 102" fill="#FCD34D"/>
+    <circle cx="108" cy="88" r="5" fill="#D97706"/>
+    <circle cx="140" cy="83" r="5" fill="#D97706"/>
+    <circle cx="172" cy="88" r="5" fill="#D97706"/>`),
+
+  smoothie: S('#FDF4FF',`
+    <path d="M100 66 L96 188 L184 188 L180 66 Z" fill="#E879F9" opacity=".2"/>
+    <path d="M100 66 L96 188 L184 188 L180 66 Z" fill="none" stroke="#C026D3" stroke-width="4"/>
+    <path d="M92 66 L188 66" stroke="#C026D3" stroke-width="4" stroke-linecap="round"/>
+    <path d="M102 80 L98 186 L182 186 L178 80 Z" fill="#E879F9" opacity=".6"/>
+    <circle cx="124" cy="136" r="16" fill="#F9A8D4" opacity=".8"/>
+    <circle cx="158" cy="152" r="13" fill="#A78BFA" opacity=".8"/>
+    <circle cx="140" cy="164" r="11" fill="#F9A8D4" opacity=".8"/>
+    <rect x="165" y="40" width="9" height="156" rx="4.5" fill="#C026D3"/>
+    <path d="M156 60 Q168 42 180 60 Q180 74 168 78 Q156 74 156 60 Z" fill="#EF4444"/>
+    <path d="M160 60 L164 50 M168 58 L172 48 M176 60 L180 50" stroke="#16A34A" stroke-width="2.5" stroke-linecap="round" fill="none"/>`),
+
+  naleśniki: S('#FFFBEB',`
+    <ellipse cx="140" cy="182" rx="100" ry="24" fill="#E5E7EB"/>
+    <ellipse cx="140" cy="164" rx="88" ry="20" fill="#D97706"/>
+    <ellipse cx="140" cy="148" rx="88" ry="20" fill="#F59E0B"/>
+    <ellipse cx="140" cy="132" rx="88" ry="20" fill="#FCD34D"/>
+    <path d="M104 120 Q118 104 140 118 Q162 104 176 120 Q176 132 140 136 Q104 132 104 120" fill="#92400E" opacity=".35"/>
+    <rect x="120" y="110" width="40" height="18" rx="7" fill="#FEF9C3"/>
+    <circle cx="108" cy="106" r="10" fill="#7C3AED"/>
+    <circle cx="126" cy="98" r="9" fill="#EF4444"/>
+    <circle cx="146" cy="98" r="10" fill="#7C3AED"/>
+    <circle cx="164" cy="106" r="9" fill="#EF4444"/>`),
+
+  ryż: S('#F0FDF4',`
+    <path d="M64 130 Q64 192 140 192 Q216 192 216 130 Z" fill="#86EFAC"/>
+    <ellipse cx="140" cy="130" rx="76" ry="22" fill="#4ADE80"/>
+    <ellipse cx="112" cy="116" rx="9" ry="5" fill="white" transform="rotate(-30 112 116)"/>
+    <ellipse cx="130" cy="106" rx="9" ry="5" fill="white" transform="rotate(10 130 106)"/>
+    <ellipse cx="150" cy="110" rx="9" ry="5" fill="white" transform="rotate(40 150 110)"/>
+    <ellipse cx="164" cy="122" rx="9" ry="5" fill="white" transform="rotate(-20 164 122)"/>
+    <ellipse cx="120" cy="124" rx="9" ry="5" fill="white" transform="rotate(25 120 124)"/>
+    <ellipse cx="144" cy="124" rx="9" ry="5" fill="white" transform="rotate(-15 144 124)"/>
+    <ellipse cx="132" cy="116" rx="8" ry="4" fill="white" transform="rotate(35 132 116)"/>
+    <ellipse cx="105" cy="126" rx="7" ry="4" fill="white" transform="rotate(-40 105 126)"/>
+    <circle cx="140" cy="96" r="12" fill="#EF4444"/>
+    <circle cx="160" cy="105" r="9" fill="#FBBF24"/>
+    <ellipse cx="118" cy="100" rx="10" ry="6" fill="#16A34A" transform="rotate(-15 118 100)"/>`),
+
+  tofu: S('#EFF6FF',`
+    <rect x="82" y="100" width="86" height="72" rx="6" fill="#DBEAFE"/>
+    <rect x="82" y="100" width="86" height="18" rx="6" fill="#BFDBFE"/>
+    <path d="M168 100 L182 86 L182 164 L168 172" fill="#BFDBFE" stroke="#93C5FD" stroke-width="1.5"/>
+    <path d="M82 100 L96 86 L182 86 L168 100" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.5"/>
+    <rect x="110" y="124" width="90" height="66" rx="6" fill="white"/>
+    <rect x="110" y="124" width="90" height="19" rx="6" fill="#DBEAFE"/>
+    <path d="M200 124 L214 110 L214 182 L200 190" fill="#DBEAFE" stroke="#93C5FD" stroke-width="1.5"/>
+    <path d="M110 124 L124 110 L214 110 L200 124" fill="#EFF6FF" stroke="#93C5FD" stroke-width="1.5"/>
+    <path d="M88 116 Q102 102 116 116" stroke="#16A34A" stroke-width="4" stroke-linecap="round" fill="none"/>
+    <circle cx="88" cy="118" r="7" fill="#22C55E"/>
+    <circle cx="116" cy="118" r="7" fill="#22C55E"/>
+    <circle cx="152" cy="108" r="6" fill="#22C55E"/>
+    <circle cx="168" cy="102" r="5" fill="#22C55E"/>`),
+
+  jogurt: S('#FFF0F3',`
+    <path d="M100 82 L180 82 L166 184 L114 184 Z" fill="#FBCFE8"/>
+    <path d="M100 82 L180 82 L174 108 L106 108 Z" fill="#F9A8D4"/>
+    <rect x="108" y="114" width="64" height="46" rx="6" fill="white" opacity=".6"/>
+    <ellipse cx="140" cy="108" rx="40" ry="14" fill="white"/>
+    <circle cx="126" cy="104" r="9" fill="#EF4444"/>
+    <circle cx="148" cy="100" r="8" fill="#EF4444"/>
+    <circle cx="140" cy="112" r="6" fill="#FCD34D"/>
+    <circle cx="156" cy="108" r="7" fill="#F9A8D4"/>
+    <path d="M175 86 L196 64" stroke="#E5E7EB" stroke-width="6" stroke-linecap="round"/>
+    <ellipse cx="199" cy="60" rx="10" ry="7" fill="#E5E7EB" transform="rotate(-45 199 60)"/>`),
+
+  wrap: S('#F0FDF4',`
+    <ellipse cx="140" cy="148" rx="90" ry="28" fill="#FEF3C7"/>
+    <path d="M50 120 Q50 78 140 72 Q230 78 230 120 L230 148 Q230 176 140 176 Q50 176 50 148 Z" fill="#FDE68A"/>
+    <ellipse cx="140" cy="112" rx="70" ry="21" fill="#86EFAC"/>
+    <ellipse cx="120" cy="106" rx="28" ry="13" fill="#EF4444" opacity=".8"/>
+    <ellipse cx="160" cy="106" rx="26" ry="12" fill="#FCD34D" opacity=".9"/>
+    <ellipse cx="140" cy="148" rx="90" ry="26" fill="#F59E0B" opacity=".6"/>
+    <ellipse cx="140" cy="148" rx="70" ry="18" fill="#FDE68A" opacity=".9"/>
+    <path d="M76 116 Q88 96 106 114" stroke="#22C55E" stroke-width="6" stroke-linecap="round" fill="none"/>
+    <path d="M174 116 Q186 96 204 114" stroke="#22C55E" stroke-width="6" stroke-linecap="round" fill="none"/>`),
+
+  kasza: S('#FFFBEB',`
+    <path d="M64 128 Q64 192 140 192 Q216 192 216 128 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="128" rx="76" ry="22" fill="#F59E0B"/>
+    <ellipse cx="112" cy="114" rx="7" ry="5" fill="#FDE68A" transform="rotate(-20 112 114)"/>
+    <ellipse cx="128" cy="104" rx="8" ry="5" fill="#FCD34D" transform="rotate(15 128 104)"/>
+    <ellipse cx="146" cy="108" rx="7" ry="5" fill="#FDE68A" transform="rotate(-30 146 108)"/>
+    <ellipse cx="162" cy="116" rx="8" ry="5" fill="#FCD34D" transform="rotate(10 162 116)"/>
+    <ellipse cx="120" cy="122" rx="8" ry="5" fill="#FDE68A" transform="rotate(25 120 122)"/>
+    <ellipse cx="144" cy="120" rx="7" ry="5" fill="#FCD34D" transform="rotate(-10 144 120)"/>
+    <ellipse cx="158" cy="122" rx="7" ry="5" fill="#FDE68A" transform="rotate(35 158 122)"/>
+    <path d="M118 110 Q118 96 140 92 Q162 96 162 110" fill="#92400E"/>
+    <rect x="126" y="110" width="28" height="16" rx="4" fill="#B45309"/>
+    <circle cx="108" cy="96" r="6" fill="#16A34A"/>
+    <circle cx="172" cy="100" r="6" fill="#16A34A"/>`),
+
+  wafle: S('#FFFBEB',`
+    <ellipse cx="140" cy="182" rx="100" ry="24" fill="#E5E7EB"/>
+    <rect x="82" y="96" width="116" height="80" rx="8" fill="#D97706"/>
+    <rect x="86" y="100" width="108" height="72" rx="7" fill="#F59E0B"/>
+    <line x1="108" y1="100" x2="108" y2="172" stroke="#D97706" stroke-width="3.5"/>
+    <line x1="140" y1="100" x2="140" y2="172" stroke="#D97706" stroke-width="3.5"/>
+    <line x1="172" y1="100" x2="172" y2="172" stroke="#D97706" stroke-width="3.5"/>
+    <line x1="86" y1="124" x2="194" y2="124" stroke="#D97706" stroke-width="3.5"/>
+    <line x1="86" y1="148" x2="194" y2="148" stroke="#D97706" stroke-width="3.5"/>
+    <circle cx="108" cy="86" r="14" fill="#EF4444"/>
+    <path d="M103 78 L108 70 L113 78" fill="#16A34A"/>
+    <path d="M124 96 Q134 78 144 96 Q148 88 156 96 Q160 82 170 96" fill="#FEF9C3" stroke="#FEF3C7" stroke-width="1.5"/>
+    <path d="M183 106 Q194 114 190 128 Q198 138 185 146" stroke="#92400E" stroke-width="3.5" stroke-linecap="round" fill="none" opacity=".6"/>`),
+
+  granola: S('#FFFBEB',`
+    <path d="M62 128 Q62 192 140 192 Q218 192 218 128 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="128" rx="78" ry="22" fill="#F59E0B"/>
+    <rect x="102" y="110" width="22" height="16" rx="8" fill="#92400E" transform="rotate(-15 102 110)"/>
+    <rect x="124" y="102" width="20" height="15" rx="7" fill="#B45309" transform="rotate(10 124 102)"/>
+    <rect x="148" y="106" width="21" height="16" rx="8" fill="#92400E" transform="rotate(25 148 106)"/>
+    <rect x="116" y="118" width="18" height="13" rx="6" fill="#B45309" transform="rotate(-5 116 118)"/>
+    <rect x="145" y="118" width="20" height="14" rx="7" fill="#92400E" transform="rotate(20 145 118)"/>
+    <ellipse cx="108" cy="116" rx="8" ry="4" fill="#FCD34D" transform="rotate(-30 108 116)"/>
+    <ellipse cx="168" cy="114" rx="7" ry="4" fill="#FDE68A" transform="rotate(20 168 114)"/>
+    <ellipse cx="172" cy="124" rx="10" ry="7" fill="#D97706" transform="rotate(-10 172 124)"/>
+    <circle cx="105" cy="94" r="10" fill="#EF4444"/>
+    <circle cx="122" cy="86" r="9" fill="#7C3AED"/>
+    <circle cx="142" cy="88" r="10" fill="#EF4444"/>
+    <circle cx="160" cy="94" r="9" fill="#EF4444"/>`),
+
+  gnocchi: S('#FFF7ED',`
+    <ellipse cx="140" cy="178" rx="98" ry="26" fill="#E5E7EB"/>
+    <ellipse cx="140" cy="172" rx="92" ry="24" fill="#F3F4F6"/>
+    <path d="M72 140 Q72 168 140 172 Q208 168 208 140" fill="#EF4444" opacity=".7"/>
+    <ellipse cx="104" cy="134" rx="23" ry="15" fill="#FDE68A"/>
+    <ellipse cx="104" cy="132" rx="19" ry="12" fill="#FEF9C3"/>
+    <path d="M95 132 Q104 127 113 132" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <ellipse cx="140" cy="126" rx="23" ry="15" fill="#FDE68A"/>
+    <ellipse cx="140" cy="124" rx="19" ry="12" fill="#FEF9C3"/>
+    <path d="M131 124 Q140 119 149 124" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <ellipse cx="176" cy="134" rx="23" ry="15" fill="#FDE68A"/>
+    <ellipse cx="176" cy="132" rx="19" ry="12" fill="#FEF9C3"/>
+    <path d="M167 132 Q176 127 185 132" stroke="#FCD34D" stroke-width="2.5" stroke-linecap="round" fill="none"/>
+    <ellipse cx="122" cy="148" rx="14" ry="7" fill="#16A34A" transform="rotate(-20 122 148)"/>
+    <ellipse cx="160" cy="146" rx="13" ry="6" fill="#22C55E" transform="rotate(15 160 146)"/>
+    <path d="M128 122 Q136 114 144 118" stroke="#FEF9C3" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+    <path d="M154 130 Q163 122 172 126" stroke="#FEF9C3" stroke-width="4.5" stroke-linecap="round" fill="none"/>`),
+
+  kotlet: S('#FFF7ED',`
+    <ellipse cx="140" cy="178" rx="100" ry="26" fill="#E5E7EB"/>
+    <ellipse cx="140" cy="172" rx="94" ry="24" fill="#F3F4F6"/>
+    <path d="M62 140 Q66 100 140 96 Q214 100 218 140 Q218 168 140 174 Q62 168 62 140 Z" fill="#D97706"/>
+    <path d="M70 140 Q74 106 140 102 Q206 106 210 140 Q208 164 140 170 Q72 164 70 140 Z" fill="#F59E0B"/>
+    <path d="M78 140 Q82 110 140 106 Q198 110 202 140 Q200 162 140 166 Q80 162 78 140 Z" fill="#FCD34D"/>
+    <circle cx="112" cy="128" r="5" fill="#D97706" opacity=".5"/>
+    <circle cx="128" cy="118" r="4" fill="#D97706" opacity=".5"/>
+    <circle cx="146" cy="122" r="5" fill="#D97706" opacity=".5"/>
+    <circle cx="162" cy="116" r="4" fill="#D97706" opacity=".5"/>
+    <circle cx="172" cy="130" r="5" fill="#D97706" opacity=".5"/>
+    <circle cx="118" cy="142" r="5" fill="#D97706" opacity=".5"/>
+    <circle cx="142" cy="148" r="4" fill="#D97706" opacity=".5"/>
+    <circle cx="168" cy="144" r="5" fill="#D97706" opacity=".5"/>
+    <circle cx="175" cy="162" r="16" fill="#FDE68A" stroke="#FCD34D" stroke-width="3"/>
+    <path d="M175 146 L175 178 M161 162 L189 162" stroke="#FCD34D" stroke-width="2.5"/>
+    <ellipse cx="100" cy="165" rx="16" ry="9" fill="#16A34A" transform="rotate(-25 100 165)"/>
+    <ellipse cx="116" cy="160" rx="14" ry="7" fill="#22C55E" transform="rotate(10 116 160)"/>`),
+
+  chia: S('#F5F3FF',`
+    <rect x="96" y="68" width="88" height="128" rx="12" fill="#E9D5FF"/>
+    <rect x="92" y="60" width="96" height="24" rx="8" fill="#C4B5FD"/>
+    <rect x="100" y="92" width="80" height="100" rx="6" fill="#DDD6FE" opacity=".8"/>
+    <circle cx="118" cy="112" r="5" fill="#4C1D95"/>
+    <circle cx="132" cy="106" r="5" fill="#4C1D95"/>
+    <circle cx="148" cy="114" r="5" fill="#4C1D95"/>
+    <circle cx="124" cy="124" r="5" fill="#4C1D95"/>
+    <circle cx="158" cy="128" r="5" fill="#4C1D95"/>
+    <circle cx="112" cy="136" r="5" fill="#4C1D95"/>
+    <circle cx="140" cy="138" r="5" fill="#4C1D95"/>
+    <circle cx="156" cy="148" r="4" fill="#4C1D95"/>
+    <circle cx="122" cy="150" r="4" fill="#4C1D95"/>
+    <circle cx="116" cy="88" r="9" fill="#7C3AED"/>
+    <circle cx="134" cy="80" r="10" fill="#EF4444"/>
+    <circle cx="154" cy="86" r="9" fill="#7C3AED"/>
+    <path d="M128 68 L140 56 L152 68" stroke="#16A34A" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>`),
+
+  bowl: S('#FFF7ED',`
+    <path d="M58 120 Q58 192 140 192 Q222 192 222 120 Z" fill="#D97706"/>
+    <ellipse cx="140" cy="120" rx="82" ry="24" fill="#F59E0B"/>
+    <ellipse cx="108" cy="106" rx="26" ry="16" fill="#4ADE80"/>
+    <ellipse cx="156" cy="100" rx="22" ry="14" fill="#FCD34D"/>
+    <circle cx="126" cy="98" r="14" fill="#EF4444"/>
+    <circle cx="162" cy="112" r="13" fill="#60A5FA"/>
+    <ellipse cx="120" cy="116" rx="18" ry="11" fill="#86EFAC"/>
+    <circle cx="152" cy="114" r="13" fill="#FEF9C3"/>
+    <circle cx="152" cy="114" r="7" fill="#FBBF24"/>
+    <ellipse cx="136" cy="104" rx="12" ry="8" fill="#FDE68A" opacity=".8"/>`),
+
+  pizza2: S('#FFF3E0',`
+    <circle cx="140" cy="115" r="82" fill="#D4622A"/>
+    <circle cx="140" cy="115" r="74" fill="#EF4444"/>
+    <circle cx="140" cy="115" r="65" fill="#FDE68A"/>
+    <circle cx="118" cy="92" r="8" fill="#EF4444"/>
+    <circle cx="162" cy="98" r="8" fill="#EF4444"/>
+    <circle cx="130" cy="130" r="8" fill="#EF4444"/>
+    <circle cx="162" cy="130" r="7" fill="#16A34A"/>
+    <circle cx="115" cy="118" r="6" fill="#16A34A"/>
+    <ellipse cx="140" cy="80" rx="15" ry="8" fill="#FEF9C3" transform="rotate(10)"/>
+    <ellipse cx="155" cy="120" rx="12" ry="7" fill="#FEF9C3" transform="rotate(-15 155 120)"/>`),
+};
+
+// ── NAME → ILLUSTRATION MATCHING ────────────────────────────────────────────
+const NAME_RULES = [
+  [['pizza','zapiekanka'],       'pizza'],
+  [['makaron','spaghetti','penne','pasta','lasagn','tagliatel','kluski'],  'makaron'],
+  [['kurczak','kura ','drób','pierś','udka z kur'],  'kurczak'],
+  [['łosoś','dorsz','tuńczyk','ryba','ryby','krewetki','łososia','śledź','pstrąg','mintaj','sola ','roladki z pieczoną'], 'ryba'],
+  [['jajecznic','szakszuka'],    'jajka'],
+  [['omlet'],                    'omlet'],
+  [['jajk'],                     'jajka'],
+  [['tofu'],                     'tofu'],
+  [['owsian','owsianka'],        'owsianka'],
+  [['sałat'],                    'sałatka'],
+  [['zupa','krem z','rosół','barszcz','żurek','bulion'],  'zupa'],
+  [['kanapk','tost'],            'kanapki'],
+  [['smoothie','koktajl'],       'smoothie'],
+  [['naleśnik','crepe','placuszk'],  'naleśniki'],
+  [['ryż'],                      'ryż'],
+  [['wrap','burrito','spring roll','fajita','tortill'],  'wrap'],
+  [['jogurt'],                   'jogurt'],
+  [['wafl'],                     'wafle'],
+  [['granola'],                  'granola'],
+  [['kasza','pęczak','kaszott','gryczana','jaglana'],  'kasza'],
+  [['gnocchi'],                  'gnocchi'],
+  [['kotlet','schnitzel','burger'],  'kotlet'],
+  [['chia','pudding'],           'chia'],
+  [['bowl'],                     'bowl'],
+];
+
+function getIllustrationKey(name) {
+  const n = name.toLowerCase();
+  for (const [keywords, key] of NAME_RULES) {
+    if (keywords.some(k => n.includes(k))) return key;
+  }
+  return null;
+}
+
+// gradient fallback — unique colour per recipe name
+function nameToHue(name) {
+  let h = 0;
+  for (let i = 0; i < name.length; i++) h = (h * 31 + name.charCodeAt(i)) & 0xffff;
+  return h % 360;
+}
+function gradientSvg(name) {
+  const hue = nameToHue(name);
+  const c1 = `hsl(${hue},55%,88%)`;
+  const c2 = `hsl(${(hue+40)%360},60%,78%)`;
+  const initials = name.replace(/\(.*?\)/g,'').trim().split(/\s+/).slice(0,2).map(w=>w[0]?.toUpperCase()||'').join('');
+  return `<svg viewBox="0 0 280 220" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="${c1}"/><stop offset="1" stop-color="${c2}"/></linearGradient></defs>
+    <rect width="280" height="220" fill="url(#g)"/>
+    <text x="140" y="135" text-anchor="middle" dominant-baseline="middle" font-family="system-ui,sans-serif" font-size="88" font-weight="700" fill="white" opacity=".35">${initials}</text>
+  </svg>`;
+}
+
+function getIllustration(recipe) {
+  const key = getIllustrationKey(recipe.name);
+  return key && SVG[key] ? SVG[key] : gradientSvg(recipe.name);
+}
 
 async function loadRecipes() {
   const res = await fetch('./recipes.json');
@@ -653,15 +1049,18 @@ function render() {
     const m = n.macros || {};
     const tags = (r.tags||[]).slice(0,3).map(t=>`<span class="card-tag">${t}</span>`).join('');
     return `<div class="recipe-card" data-id="${r.id}" tabindex="0">
-      <div class="card-slot"><span class="dot"></span>${formatSlot(r)}</div>
-      <div class="card-name">${r.name}</div>
-      <div class="card-macros">
-        <div class="macro-box kcal"><span class="val">${n.calories||'–'}</span><span class="lbl">kcal</span></div>
-        <div class="macro-box protein"><span class="val">${m.protein_g||'–'}g</span><span class="lbl">Bialko</span></div>
-        <div class="macro-box"><span class="val">${m.carbs_g||'–'}g</span><span class="lbl">Wegle</span></div>
-        <div class="macro-box"><span class="val">${m.fat_g||'–'}g</span><span class="lbl">Tluszcz</span></div>
+      <div class="card-illustration">${getIllustration(r)}</div>
+      <div class="card-body">
+        <div class="card-slot"><span class="dot"></span>${formatSlot(r)}</div>
+        <div class="card-name">${r.name}</div>
+        <div class="card-macros">
+          <div class="macro-box kcal"><span class="val">${n.calories||'–'}</span><span class="lbl">kcal</span></div>
+          <div class="macro-box protein"><span class="val">${m.protein_g||'–'}g</span><span class="lbl">Bialko</span></div>
+          <div class="macro-box"><span class="val">${m.carbs_g||'–'}g</span><span class="lbl">Wegle</span></div>
+          <div class="macro-box"><span class="val">${m.fat_g||'–'}g</span><span class="lbl">Tluszcz</span></div>
+        </div>
+        ${tags ? `<div class="card-tags">${tags}</div>` : ''}
       </div>
-      ${tags ? `<div class="card-tags">${tags}</div>` : ''}
     </div>`;
   }).join('');
 
@@ -677,6 +1076,7 @@ function openModal(id) {
   const n = r.nutrition || {};
   const m = n.macros || {};
 
+  document.getElementById('modal-illustration').innerHTML = getIllustration(r);
   document.getElementById('modal-slot').textContent = formatSlot(r);
   document.getElementById('modal-name').textContent = r.name;
 
