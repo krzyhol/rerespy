@@ -127,12 +127,12 @@
 
     /* slot buttons */
     .slot-grid {
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      display: flex;
+      flex-direction: column;
       gap: 6px;
     }
     .slot-btn {
-      padding: 8px 4px;
+      padding: 8px 12px;
       border: 1px solid var(--border);
       border-radius: 9px;
       background: var(--surface2);
@@ -141,7 +141,7 @@
       font-weight: 600;
       font-family: inherit;
       cursor: pointer;
-      text-align: center;
+      text-align: left;
       transition: all .15s;
     }
     .slot-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -593,8 +593,8 @@ let activeSlots = new Set();
 let activeTags = new Set();
 
 const slotNames = {
-  1: 'Posilek 1', 2: 'Posilek 2', 3: 'Posilek 3',
-  4: 'Posilek 4', 5: 'Posilek 5', 6: 'Posilek 6'
+  1: 'Śniadanie', 2: 'Drugie śniadanie', 3: 'Obiad',
+  4: 'Kolacja', 99: 'Przekąska'
 };
 
 // ── SVG ILLUSTRATIONS ─────────────────────────────────────────────────────────
@@ -1003,8 +1003,8 @@ function buildFilters() {
   slots.forEach(s => {
     const btn = document.createElement('button');
     btn.className = 'slot-btn';
-    btn.textContent = s;
-    btn.title = slotNames[s] || `Posilek ${s}`;
+    btn.textContent = slotNames[s] || `Posiłek ${s}`;
+    btn.title = slotNames[s] || `Posiłek ${s}`;
     btn.dataset.slot = s;
     btn.addEventListener('click', () => {
       activeSlots.has(s) ? activeSlots.delete(s) : activeSlots.add(s);
@@ -1069,7 +1069,7 @@ function formatSlot(r) {
   const tw = r.meal_slot?.time_window;
   const from = tw?.from, to = tw?.to;
   const time = from && to ? ` · ${from}–${to}` : '';
-  return n ? `Posilek ${n}${time}` : '';
+  return n ? `${slotNames[n] || `Posiłek ${n}`}${time}` : '';
 }
 
 function render() {
