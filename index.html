@@ -509,6 +509,139 @@
       color: var(--text3);
       font-size: 15px;
     }
+
+    /* ── RATINGS ── */
+    .stars-row {
+      display: inline-flex;
+      gap: 2px;
+      align-items: center;
+    }
+    .star {
+      color: var(--surface3);
+      font-size: 15px;
+      line-height: 1;
+      transition: color .1s, transform .1s;
+      cursor: default;
+    }
+    .star.filled { color: var(--accent); }
+    .star.clickable { cursor: pointer; }
+    .star.clickable:hover,
+    .star.clickable:hover ~ .star { color: var(--surface3); }
+    .stars-row:hover .star.clickable { color: var(--accent); }
+    .stars-row .star.clickable:hover ~ .star.clickable { color: var(--surface3); }
+
+    .card-rating {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      margin-bottom: 12px;
+    }
+    .rating-count {
+      font-size: 11px;
+      color: var(--text3);
+      font-weight: 500;
+    }
+    .rating-avg {
+      font-size: 12px;
+      font-weight: 700;
+      color: var(--accent);
+    }
+
+    .modal-rating {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 16px 0;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 24px;
+    }
+    .modal-rating .stars-row .star { font-size: 22px; }
+    .modal-rating-label {
+      font-size: 13px;
+      color: var(--text2);
+      font-weight: 500;
+    }
+    .modal-rating-info {
+      font-size: 12px;
+      color: var(--text3);
+      margin-left: auto;
+    }
+    .rating-voted-badge {
+      font-size: 11px;
+      font-weight: 700;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 3px 9px;
+      border-radius: 20px;
+    }
+    /* ── NICK DIALOG ── */
+    .nick-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.7);
+      z-index: 300;
+      align-items: center;
+      justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .nick-overlay.open { display: flex; }
+    .nick-dialog {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 32px 28px;
+      max-width: 400px;
+      width: 90%;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7);
+    }
+    .nick-dialog h2 { font-size: 20px; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+    .nick-dialog p { font-size: 13px; color: var(--text2); margin-bottom: 20px; line-height: 1.5; }
+    .nick-dialog p b { color: var(--accent); }
+    #nick-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 600;
+      font-family: inherit;
+      background: var(--surface2);
+      color: var(--text);
+      outline: none;
+      margin-bottom: 16px;
+      transition: border-color .2s;
+    }
+    #nick-input:focus { border-color: var(--accent); }
+    #nick-input::placeholder { color: var(--text3); font-weight: 400; }
+    .nick-actions { display: flex; gap: 10px; }
+    .btn-primary {
+      flex: 1; padding: 11px;
+      background: var(--accent); color: white; border: none;
+      border-radius: 10px; font-size: 14px; font-weight: 700;
+      font-family: inherit; cursor: pointer; transition: opacity .15s;
+    }
+    .btn-primary:hover { opacity: .88; }
+    .btn-ghost {
+      padding: 11px 16px; background: none; color: var(--text3);
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 14px; font-family: inherit; cursor: pointer; transition: all .15s;
+    }
+    .btn-ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed; bottom: 24px; left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid var(--border);
+      color: var(--text); padding: 10px 20px; border-radius: 40px;
+      font-size: 13px; font-weight: 600; box-shadow: var(--shadow);
+      opacity: 0; transition: opacity .25s, transform .25s;
+      pointer-events: none; z-index: 400; white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+    #toast.toast-error { border-color: #ef4444; color: #ef4444; }
   </style>
 </head>
 <body>
@@ -558,11 +691,12 @@
     <div class="results-bar">
       <span class="results-count" id="results-count"></span>
       <select class="sort-select" id="sort-select">
-        <option value="default">Kolejnosc domyslna</option>
+        <option value="default">Kolejność domyślna</option>
+        <option value="rating">Najlepiej oceniane</option>
         <option value="name">Nazwa A–Z</option>
-        <option value="cal-asc">Kalorie rosnaco</option>
-        <option value="cal-desc">Kalorie malejaco</option>
-        <option value="protein">Bialko (max)</option>
+        <option value="cal-asc">Kalorie rosnąco</option>
+        <option value="cal-desc">Kalorie malejąco</option>
+        <option value="protein">Białko (max)</option>
       </select>
     </div>
     <div id="recipe-grid">
@@ -987,12 +1121,206 @@ function getIllustration(recipe) {
   return key && SVG[key] ? SVG[key] : gradientSvg(recipe.name);
 }
 
+// ── RATINGS ──────────────────────────────────────────────────────────────────
+const RATINGS = {
+  token: '',  // wklej GitHub PAT (scope: gist) — NIE commituj tokena
+  gistId: '',               // uzupełniane automatycznie przy pierwszym zapisie
+  filename: 'rerespo-ratings.json'
+};
+
+// { users: { nick: { recipeId: stars } } }
+let ratingsData = { users: {} };
+let ratingsLoaded = false;
+
+// ── nick ──
+function getSavedNick() {
+  return localStorage.getItem('rerespo-nick') || null;
+}
+function saveNick(nick) {
+  localStorage.setItem('rerespo-nick', nick);
+}
+
+// ── gist I/O ──
+async function fetchRatings() {
+  if (!RATINGS.gistId) return;
+  try {
+    const headers = RATINGS.token ? { Authorization: `token ${RATINGS.token}` } : {};
+    const res = await fetch(`https://api.github.com/gists/${RATINGS.gistId}`, { headers });
+    if (!res.ok) return;
+    const data = await res.json();
+    const content = data.files?.[RATINGS.filename]?.content;
+    if (content) ratingsData = JSON.parse(content);
+    ratingsLoaded = true;
+  } catch (e) { console.warn('Ratings unavailable', e); }
+}
+
+async function saveRatings() {
+  if (!RATINGS.token) return;
+  const body = { files: { [RATINGS.filename]: { content: JSON.stringify(ratingsData, null, 2) } } };
+  if (RATINGS.gistId) {
+    await fetch(`https://api.github.com/gists/${RATINGS.gistId}`, {
+      method: 'PATCH',
+      headers: { Authorization: `token ${RATINGS.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify(body)
+    });
+  } else {
+    const res = await fetch('https://api.github.com/gists', {
+      method: 'POST',
+      headers: { Authorization: `token ${RATINGS.token}`, 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...body, description: 'ReRespo ratings', public: false })
+    });
+    const d = await res.json();
+    RATINGS.gistId = d.id;
+    console.info('Gist created:', d.id, d.html_url);
+  }
+}
+
+// ── computed ──
+function getAvg(recipeId) {
+  const votes = Object.values(ratingsData.users)
+    .map(u => u[recipeId])
+    .filter(v => v !== undefined);
+  if (!votes.length) return null;
+  return { avg: votes.reduce((a, b) => a + b, 0) / votes.length, count: votes.length };
+}
+
+function myRating(recipeId) {
+  const nick = getSavedNick();
+  if (!nick) return null;
+  return ratingsData.users[nick]?.[recipeId] ?? null;
+}
+
+// ── nick dialog ──
+let pendingRating = null;
+
+function showNickDialog(recipeId, stars) {
+  pendingRating = { recipeId, stars };
+  const existing = getSavedNick();
+  document.getElementById('nick-input').value = existing || '';
+  document.getElementById('nick-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('nick-input').focus(), 50);
+}
+
+function closeNickDialog() {
+  document.getElementById('nick-overlay').classList.remove('open');
+  pendingRating = null;
+}
+
+async function confirmNick() {
+  const raw = document.getElementById('nick-input').value.trim();
+  if (!raw) { document.getElementById('nick-input').focus(); return; }
+  const nick = raw.toLowerCase().replace(/\s+/g, '_').slice(0, 30);
+
+  // load fresh data before checking nick existence
+  await fetchRatings();
+  const isReturning = !!ratingsData.users[nick];
+  saveNick(nick);
+  closeNickDialog();
+
+  showToast(isReturning ? `Witaj z powrotem, ${nick}! 👋` : `Cześć, ${nick}! Oceny są teraz zapisywane.`);
+
+  const pending = pendingRating;
+  pendingRating = null;
+  if (pending) await doRate(nick, pending.recipeId, pending.stars);
+  else { render(); refreshModalRating(document.getElementById('modal-rating-block')?.dataset.recipe); }
+}
+
+// ── rating I/O ──
+async function doRate(nick, recipeId, stars) {
+  if (!RATINGS.token) { showToast('Ocenianie niedostępne.', true); return; }
+  await fetchRatings();
+  if (!ratingsData.users[nick]) ratingsData.users[nick] = {};
+  ratingsData.users[nick][recipeId] = stars;
+  render();
+  refreshModalRating(recipeId);
+  await saveRatings();
+  showToast('Ocena zapisana ✓');
+}
+
+async function submitRating(recipeId, stars) {
+  if (!RATINGS.token) { showToast('Ocenianie niedostępne.', true); return; }
+  const nick = getSavedNick();
+  if (!nick) { showNickDialog(recipeId, stars); return; }
+  await doRate(nick, recipeId, stars);
+}
+
+// ── toast ──
+function showToast(msg, error = false) {
+  let t = document.getElementById('toast');
+  if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
+  t.textContent = msg;
+  t.className = 'toast' + (error ? ' toast-error' : '') + ' show';
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => t.classList.remove('show'), 3000);
+}
+
+// ── star rendering ──
+function starsHtml(recipeId, size = 15) {
+  const info = getAvg(recipeId);
+  const avg = info?.avg ?? 0;
+  const mine = myRating(recipeId);
+  const displayAvg = mine ?? avg;
+  const canClick = !!RATINGS.token && mine === null;
+  let html = '';
+  for (let i = 1; i <= 5; i++) {
+    const filled = displayAvg >= i - 0.5;
+    html += `<span class="star${filled ? ' filled' : ''}${canClick ? ' clickable' : ''}"
+      style="font-size:${size}px" data-star="${i}" data-recipe="${recipeId}">★</span>`;
+  }
+  return `<div class="stars-row" data-recipe="${recipeId}">${html}</div>`;
+}
+
+function bindStarClicks(container) {
+  if (!container) return;
+  container.querySelectorAll('.star.clickable').forEach(star => {
+    star.addEventListener('mouseenter', () => {
+      const row = star.closest('.stars-row');
+      const n = +star.dataset.star;
+      row.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('filled', i < n));
+    });
+    star.addEventListener('mouseleave', () => {
+      const row = star.closest('.stars-row');
+      const avg = getAvg(row.dataset.recipe)?.avg ?? 0;
+      row.querySelectorAll('.star').forEach((s, i) => s.classList.toggle('filled', avg >= i + 0.5));
+    });
+    star.addEventListener('click', () => submitRating(star.dataset.recipe, +star.dataset.star));
+  });
+}
+
+function refreshModalRating(recipeId) {
+  const block = document.getElementById('modal-rating-block');
+  if (!block || !recipeId || block.dataset.recipe !== recipeId) return;
+  block.innerHTML = modalRatingHtml(recipeId);
+  bindStarClicks(block);
+}
+
+function modalRatingHtml(recipeId) {
+  const info = getAvg(recipeId);
+  const mine = myRating(recipeId);
+  const nick = getSavedNick();
+  const countText = info
+    ? `${info.avg.toFixed(1)} · ${info.count} ${info.count === 1 ? 'ocena' : info.count < 5 ? 'oceny' : 'ocen'}`
+    : 'Brak ocen';
+  const badge = mine ? `<span class="rating-voted-badge">Twoja ocena: ${mine}★</span>` : '';
+  const label = mine
+    ? `Oceniłeś${nick ? ` jako <b>${nick}</b>` : ''}`
+    : (nick ? `Oceń przepis jako <b>${nick}</b>` : 'Oceń przepis');
+  return `
+    <span class="modal-rating-label">${label}:</span>
+    ${starsHtml(recipeId, 22)}
+    <span class="modal-rating-info">${countText}</span>
+    ${badge}
+  `;
+}
+
 async function loadRecipes() {
   const res = await fetch('./recipes.json');
   const data = await res.json();
   allRecipes = data.recipes || [];
   buildFilters();
   render();
+  // load ratings in background, re-render when ready
+  fetchRatings().then(() => { if (ratingsLoaded) render(); });
 }
 
 function buildFilters() {
@@ -1060,6 +1388,7 @@ function getFiltered() {
   else if (sort === 'cal-asc') list.sort((a,b)=>(a.nutrition?.calories||0)-(b.nutrition?.calories||0));
   else if (sort === 'cal-desc') list.sort((a,b)=>(b.nutrition?.calories||0)-(a.nutrition?.calories||0));
   else if (sort === 'protein') list.sort((a,b)=>(b.nutrition?.macros?.protein_g||0)-(a.nutrition?.macros?.protein_g||0));
+  else if (sort === 'rating') list.sort((a,b)=>(getAvg(b.id)?.avg||0)-(getAvg(a.id)?.avg||0));
 
   return list;
 }
@@ -1084,11 +1413,17 @@ function render() {
     const n = r.nutrition || {};
     const m = n.macros || {};
     const tags = (r.tags||[]).slice(0,3).map(t=>`<span class="card-tag">${t}</span>`).join('');
+    const ratingInfo = getAvg(r.id);
+    const ratingHtml = `<div class="card-rating">
+      ${starsHtml(r.id, 14)}
+      ${ratingInfo ? `<span class="rating-avg">${ratingInfo.avg.toFixed(1)}</span><span class="rating-count">(${ratingInfo.count})</span>` : '<span class="rating-count">brak ocen</span>'}
+    </div>`;
     return `<div class="recipe-card" data-id="${r.id}" tabindex="0">
       <div class="card-illustration">${getIllustration(r)}</div>
       <div class="card-body">
-        <div class="card-slot"><span class="dot"></span>${formatSlot(r)}</div>
+        <div class="card-slot">${formatSlot(r)}</div>
         <div class="card-name">${r.name}</div>
+        ${ratingHtml}
         <div class="card-macros">
           <div class="macro-box kcal"><span class="val">${n.calories||'–'}</span><span class="lbl">kcal</span></div>
           <div class="macro-box protein"><span class="val">${m.protein_g||'–'}g</span><span class="lbl">Bialko</span></div>
@@ -1101,9 +1436,13 @@ function render() {
   }).join('');
 
   grid.querySelectorAll('.recipe-card').forEach(card => {
-    card.addEventListener('click', () => openModal(card.dataset.id));
+    card.addEventListener('click', e => {
+      if (e.target.closest('.stars-row')) return; // don't open modal when clicking stars
+      openModal(card.dataset.id);
+    });
     card.addEventListener('keydown', e => { if (e.key==='Enter'||e.key===' ') openModal(card.dataset.id); });
   });
+  bindStarClicks(grid);
 }
 
 function openModal(id) {
@@ -1141,6 +1480,9 @@ function openModal(id) {
   const tags = (r.tags||[]).map(t=>`<span class="modal-tag">${t}</span>`).join('');
 
   document.getElementById('modal-body').innerHTML = `
+    <div class="modal-rating" id="modal-rating-block" data-recipe="${r.id}">
+      ${modalRatingHtml(r.id)}
+    </div>
     <div class="modal-macros">
       <div class="modal-macro kcal"><div class="val">${n.calories||'–'}</div><div class="lbl">kcal</div></div>
       <div class="modal-macro protein"><div class="val">${m.protein_g||'–'} g</div><div class="lbl">Bialko</div></div>
@@ -1154,6 +1496,7 @@ function openModal(id) {
 
   document.getElementById('modal-overlay').classList.add('open');
   document.body.style.overflow = 'hidden';
+  bindStarClicks(document.getElementById('modal-rating-block'));
 }
 
 function closeModal() {
@@ -1188,6 +1531,24 @@ loadRecipes().catch(err => {
   document.getElementById('recipe-grid').innerHTML =
     `<div class="empty-state"><p>Blad ladowania: ${err.message}</p><p style="font-size:12px;margin-top:8px">Uruchom serwer HTTP w tym folderze, np.:<br><code>python3 -m http.server 8080</code></p></div>`;
 });
+// nick dialog events
+document.getElementById('nick-confirm').addEventListener('click', confirmNick);
+document.getElementById('nick-cancel').addEventListener('click', closeNickDialog);
+document.getElementById('nick-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmNick(); if (e.key === 'Escape') closeNickDialog(); });
+document.getElementById('nick-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeNickDialog(); });
 </script>
+
+<!-- NICK DIALOG -->
+<div class="nick-overlay" id="nick-overlay">
+  <div class="nick-dialog">
+    <h2>Jak masz na imię?</h2>
+    <p>Wpisz swój <b>unikalny nick</b> — będzie używany do zapisywania Twoich ocen. Jeśli nick już istnieje w bazie, zakładamy że to Ty wracasz.</p>
+    <input id="nick-input" type="text" placeholder="np. krzysiek" maxlength="30" autocomplete="off" spellcheck="false" />
+    <div class="nick-actions">
+      <button class="btn-primary" id="nick-confirm">Gotowe</button>
+      <button class="btn-ghost" id="nick-cancel">Anuluj</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
