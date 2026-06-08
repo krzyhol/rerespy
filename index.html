@@ -642,53 +642,6 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.toast-error { border-color: #ef4444; color: #ef4444; }
-
-    /* ── SETTINGS ── */
-    .settings-btn {
-      margin-left: auto;
-      background: none; border: 1px solid var(--border);
-      border-radius: 10px; width: 38px; height: 38px;
-      display: flex; align-items: center; justify-content: center;
-      cursor: pointer; color: var(--text3); transition: all .15s; flex-shrink: 0;
-    }
-    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
-    .settings-btn.configured { border-color: var(--accent2); color: var(--accent2); }
-
-    .settings-overlay {
-      display: none; position: fixed; inset: 0;
-      background: rgba(0,0,0,.7); z-index: 300;
-      align-items: center; justify-content: center;
-      backdrop-filter: blur(8px);
-    }
-    .settings-overlay.open { display: flex; }
-    .settings-dialog {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; padding: 32px 28px;
-      max-width: 480px; width: 90%;
-      box-shadow: 0 32px 80px rgba(0,0,0,.7);
-    }
-    .settings-dialog h2 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
-    .settings-dialog .settings-desc { font-size: 12px; color: var(--text3); margin-bottom: 24px; line-height: 1.5; }
-    .settings-field { margin-bottom: 16px; }
-    .settings-field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 6px; }
-    .settings-field input {
-      width: 100%; padding: 11px 14px;
-      border: 1px solid var(--border); border-radius: 10px;
-      font-size: 13px; font-family: 'Courier New', monospace;
-      background: var(--surface2); color: var(--text); outline: none;
-      transition: border-color .2s;
-    }
-    .settings-field input:focus { border-color: var(--accent); }
-    .settings-field input::placeholder { color: var(--text3); font-family: inherit; }
-    .settings-field .field-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
-    .settings-field .field-hint a { color: var(--accent); text-decoration: none; }
-    .settings-actions { display: flex; gap: 10px; margin-top: 20px; }
-    .settings-status {
-      font-size: 12px; font-weight: 600; padding: 8px 12px;
-      border-radius: 8px; margin-bottom: 16px; display: none;
-    }
-    .settings-status.ok { display: block; background: rgba(74,222,128,.1); color: var(--accent2); border: 1px solid rgba(74,222,128,.3); }
-    .settings-status.err { display: block; background: rgba(239,68,68,.1); color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
   </style>
 </head>
 <body>
@@ -702,11 +655,6 @@
       </svg>
       <input id="search" type="search" placeholder="Szukaj przepisu, składnika..." autocomplete="off" />
     </div>
-    <button class="settings-btn" id="settings-btn" title="Ustawienia oceniania">
-      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
-      </svg>
-    </button>
   </div>
 </header>
 
@@ -756,29 +704,6 @@
     </div>
   </main>
 
-</div>
-
-<!-- SETTINGS DIALOG -->
-<div class="settings-overlay" id="settings-overlay">
-  <div class="settings-dialog">
-    <h2>⚙️ Ustawienia oceniania</h2>
-    <p class="settings-desc">Token jest przechowywany tylko w Twojej przeglądarce (localStorage) i nigdy nie trafia do kodu.</p>
-    <div id="settings-status" class="settings-status"></div>
-    <div class="settings-field">
-      <label>GitHub Personal Access Token (scope: gist)</label>
-      <input id="settings-token" type="password" placeholder="ghp_…" autocomplete="off" spellcheck="false" />
-      <p class="field-hint">Wygeneruj na <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">github.com/settings/tokens</a> — zaznacz tylko zakres <b>gist</b>.</p>
-    </div>
-    <div class="settings-field">
-      <label>Gist ID <span style="font-weight:400;color:var(--text3)">(opcjonalne — uzupełnia się automatycznie)</span></label>
-      <input id="settings-gist" type="text" placeholder="np. a1b2c3d4e5f6…" autocomplete="off" spellcheck="false" />
-      <p class="field-hint">Jeśli ktoś inny już stworzył Gista — wklej jego ID żeby wszyscy pisali do tej samej bazy.</p>
-    </div>
-    <div class="settings-actions">
-      <button class="btn-primary" id="settings-save">Zapisz i połącz</button>
-      <button class="btn-ghost" id="settings-cancel">Anuluj</button>
-    </div>
-  </div>
 </div>
 
 <!-- NICK DIALOG -->
@@ -1209,64 +1134,38 @@ function getIllustration(recipe) {
   return key && SVG[key] ? SVG[key] : gradientSvg(recipe.name);
 }
 
-// ── RATINGS ──────────────────────────────────────────────────────────────────
-// token i gistId są przechowywane w localStorage — nigdy w kodzie
-const RATINGS = {
-  get token()  { return localStorage.getItem('rerespo-gh-token') || ''; },
-  set token(v) { if (v) localStorage.setItem('rerespo-gh-token', v); else localStorage.removeItem('rerespo-gh-token'); },
-  get gistId() { return localStorage.getItem('rerespo-gist-id') || ''; },
-  set gistId(v){ localStorage.setItem('rerespo-gist-id', v); },
-  filename: 'rerespo-ratings.json'
+// ── RATINGS — JSONBin.io ─────────────────────────────────────────────────────
+const JSONBIN = {
+  apiKey: '$2a$10$kASvNLszt4btcuj4qBdpC.JIwO6Za3AZdkgoMIXESp8sW3V99VNcC',
+  binId:  '6a26c22bda38895dfe99ff8f',
 };
 
-// { users: { nick: { recipeId: stars } } }
 let ratingsData = { users: {} };
 let ratingsLoaded = false;
 
-// ── nick ──
-function getSavedNick() {
-  return localStorage.getItem('rerespo-nick') || null;
-}
-function saveNick(nick) {
-  localStorage.setItem('rerespo-nick', nick);
-}
-
-// ── gist I/O ──
 async function fetchRatings() {
-  if (!RATINGS.gistId) return;
+  if (!JSONBIN.binId) return;
   try {
-    const headers = RATINGS.token ? { Authorization: `token ${RATINGS.token}` } : {};
-    const res = await fetch(`https://api.github.com/gists/${RATINGS.gistId}`, { headers });
+    const res = await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN.binId}/latest`, {
+      headers: { 'X-Master-Key': JSONBIN.apiKey }
+    });
     if (!res.ok) return;
-    const data = await res.json();
-    const content = data.files?.[RATINGS.filename]?.content;
-    if (content) ratingsData = JSON.parse(content);
+    const json = await res.json();
+    ratingsData = json.record || { users: {} };
     ratingsLoaded = true;
+    render();
   } catch (e) { console.warn('Ratings unavailable', e); }
 }
 
 async function saveRatings() {
-  if (!RATINGS.token) return;
-  const body = { files: { [RATINGS.filename]: { content: JSON.stringify(ratingsData, null, 2) } } };
-  if (RATINGS.gistId) {
-    await fetch(`https://api.github.com/gists/${RATINGS.gistId}`, {
-      method: 'PATCH',
-      headers: { Authorization: `token ${RATINGS.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify(body)
-    });
-  } else {
-    const res = await fetch('https://api.github.com/gists', {
-      method: 'POST',
-      headers: { Authorization: `token ${RATINGS.token}`, 'Content-Type': 'application/json' },
-      body: JSON.stringify({ ...body, description: 'ReRespo ratings', public: false })
-    });
-    const d = await res.json();
-    RATINGS.gistId = d.id;
-    console.info('Gist created:', d.id, d.html_url);
-  }
+  if (!JSONBIN.binId) return;
+  await fetch(`https://api.jsonbin.io/v3/b/${JSONBIN.binId}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json', 'X-Master-Key': JSONBIN.apiKey },
+    body: JSON.stringify(ratingsData)
+  });
 }
 
-// ── computed ──
 function getAvg(recipeId) {
   const votes = Object.values(ratingsData.users)
     .map(u => u[recipeId])
@@ -1281,13 +1180,14 @@ function myRating(recipeId) {
   return ratingsData.users[nick]?.[recipeId] ?? null;
 }
 
-// ── nick dialog ──
+function getSavedNick() { return localStorage.getItem('rerespo-nick') || null; }
+function saveNick(nick) { localStorage.setItem('rerespo-nick', nick); }
+
 let pendingRating = null;
 
 function showNickDialog(recipeId, stars) {
   pendingRating = { recipeId, stars };
-  const existing = getSavedNick();
-  document.getElementById('nick-input').value = existing || '';
+  document.getElementById('nick-input').value = getSavedNick() || '';
   document.getElementById('nick-overlay').classList.add('open');
   setTimeout(() => document.getElementById('nick-input').focus(), 50);
 }
@@ -1301,24 +1201,18 @@ async function confirmNick() {
   const raw = document.getElementById('nick-input').value.trim();
   if (!raw) { document.getElementById('nick-input').focus(); return; }
   const nick = raw.toLowerCase().replace(/\s+/g, '_').slice(0, 30);
-
-  // load fresh data before checking nick existence
   await fetchRatings();
   const isReturning = !!ratingsData.users[nick];
   saveNick(nick);
   closeNickDialog();
-
-  showToast(isReturning ? `Witaj z powrotem, ${nick}! 👋` : `Cześć, ${nick}! Oceny są teraz zapisywane.`);
-
+  showToast(isReturning ? `Witaj z powrotem, ${nick}! 👋` : `Cześć, ${nick}!`);
   const pending = pendingRating;
   pendingRating = null;
   if (pending) await doRate(nick, pending.recipeId, pending.stars);
   else { render(); refreshModalRating(document.getElementById('modal-rating-block')?.dataset.recipe); }
 }
 
-// ── rating I/O ──
 async function doRate(nick, recipeId, stars) {
-  if (!RATINGS.token) { showToast('Ocenianie niedostępne.', true); return; }
   await fetchRatings();
   if (!ratingsData.users[nick]) ratingsData.users[nick] = {};
   ratingsData.users[nick][recipeId] = stars;
@@ -1329,13 +1223,12 @@ async function doRate(nick, recipeId, stars) {
 }
 
 async function submitRating(recipeId, stars) {
-  if (!RATINGS.token) { showToast('Ocenianie niedostępne.', true); return; }
+  if (!JSONBIN.binId) { showToast('Skonfiguruj JSONBin w kodzie.', true); return; }
   const nick = getSavedNick();
   if (!nick) { showNickDialog(recipeId, stars); return; }
   await doRate(nick, recipeId, stars);
 }
 
-// ── toast ──
 function showToast(msg, error = false) {
   let t = document.getElementById('toast');
   if (!t) { t = document.createElement('div'); t.id = 'toast'; document.body.appendChild(t); }
@@ -1345,13 +1238,12 @@ function showToast(msg, error = false) {
   t._timer = setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-// ── star rendering ──
 function starsHtml(recipeId, size = 15) {
   const info = getAvg(recipeId);
   const avg = info?.avg ?? 0;
   const mine = myRating(recipeId);
   const displayAvg = mine ?? avg;
-  const canClick = !!RATINGS.token && mine === null;
+  const canClick = mine === null && !!JSONBIN.binId;
   let html = '';
   for (let i = 1; i <= 5; i++) {
     const filled = displayAvg >= i - 0.5;
@@ -1395,7 +1287,7 @@ function modalRatingHtml(recipeId) {
   const badge = mine ? `<span class="rating-voted-badge">Twoja ocena: ${mine}★</span>` : '';
   const label = mine
     ? `Oceniłeś${nick ? ` jako <b>${nick}</b>` : ''}`
-    : (nick ? `Oceń przepis jako <b>${nick}</b>` : 'Oceń przepis');
+    : (nick ? `Oceń jako <b>${nick}</b>` : 'Oceń przepis');
   return `
     <span class="modal-rating-label">${label}:</span>
     ${starsHtml(recipeId, 22)}
@@ -1628,68 +1520,6 @@ document.getElementById('nick-cancel').addEventListener('click', closeNickDialog
 document.getElementById('nick-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmNick(); if (e.key === 'Escape') closeNickDialog(); });
 document.getElementById('nick-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeNickDialog(); });
 
-// ── SETTINGS DIALOG ──────────────────────────────────────────────────────────
-function updateSettingsBtn() {
-  const btn = document.getElementById('settings-btn');
-  btn.classList.toggle('configured', !!RATINGS.token);
-}
-
-function openSettings() {
-  document.getElementById('settings-token').value = RATINGS.token;
-  document.getElementById('settings-gist').value = RATINGS.gistId;
-  document.getElementById('settings-status').className = 'settings-status';
-  document.getElementById('settings-overlay').classList.add('open');
-}
-
-function closeSettings() {
-  document.getElementById('settings-overlay').classList.remove('open');
-}
-
-async function saveSettings() {
-  const token = document.getElementById('settings-token').value.trim();
-  const gistId = document.getElementById('settings-gist').value.trim();
-  const statusEl = document.getElementById('settings-status');
-
-  if (!token) {
-    statusEl.textContent = 'Wpisz token GitHub.';
-    statusEl.className = 'settings-status err';
-    return;
-  }
-
-  // verify token
-  statusEl.textContent = 'Sprawdzanie tokena…';
-  statusEl.className = 'settings-status ok';
-  try {
-    const res = await fetch('https://api.github.com/gists', {
-      headers: { Authorization: `token ${token}` }
-    });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-  } catch (e) {
-    statusEl.textContent = `Błąd: ${e.message} — sprawdź token.`;
-    statusEl.className = 'settings-status err';
-    return;
-  }
-
-  RATINGS.token = token;
-  if (gistId) RATINGS.gistId = gistId;
-
-  // reload ratings with new config
-  await fetchRatings();
-  render();
-
-  statusEl.textContent = '✓ Zapisano. Ocenianie działa!';
-  statusEl.className = 'settings-status ok';
-  updateSettingsBtn();
-  setTimeout(closeSettings, 1500);
-}
-
-document.getElementById('settings-btn').addEventListener('click', openSettings);
-document.getElementById('settings-save').addEventListener('click', saveSettings);
-document.getElementById('settings-cancel').addEventListener('click', closeSettings);
-document.getElementById('settings-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSettings(); });
-document.getElementById('settings-token').addEventListener('keydown', e => { if (e.key === 'Enter') saveSettings(); });
-
-updateSettingsBtn();
 </script>
 </body>
 </html>
