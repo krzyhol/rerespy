@@ -642,6 +642,53 @@
     }
     #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
     #toast.toast-error { border-color: #ef4444; color: #ef4444; }
+
+    /* ── SETTINGS ── */
+    .settings-btn {
+      margin-left: auto;
+      background: none; border: 1px solid var(--border);
+      border-radius: 10px; width: 38px; height: 38px;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text3); transition: all .15s; flex-shrink: 0;
+    }
+    .settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .settings-btn.configured { border-color: var(--accent2); color: var(--accent2); }
+
+    .settings-overlay {
+      display: none; position: fixed; inset: 0;
+      background: rgba(0,0,0,.7); z-index: 300;
+      align-items: center; justify-content: center;
+      backdrop-filter: blur(8px);
+    }
+    .settings-overlay.open { display: flex; }
+    .settings-dialog {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; padding: 32px 28px;
+      max-width: 480px; width: 90%;
+      box-shadow: 0 32px 80px rgba(0,0,0,.7);
+    }
+    .settings-dialog h2 { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .settings-dialog .settings-desc { font-size: 12px; color: var(--text3); margin-bottom: 24px; line-height: 1.5; }
+    .settings-field { margin-bottom: 16px; }
+    .settings-field label { display: block; font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .8px; color: var(--text3); margin-bottom: 6px; }
+    .settings-field input {
+      width: 100%; padding: 11px 14px;
+      border: 1px solid var(--border); border-radius: 10px;
+      font-size: 13px; font-family: 'Courier New', monospace;
+      background: var(--surface2); color: var(--text); outline: none;
+      transition: border-color .2s;
+    }
+    .settings-field input:focus { border-color: var(--accent); }
+    .settings-field input::placeholder { color: var(--text3); font-family: inherit; }
+    .settings-field .field-hint { font-size: 11px; color: var(--text3); margin-top: 5px; }
+    .settings-field .field-hint a { color: var(--accent); text-decoration: none; }
+    .settings-actions { display: flex; gap: 10px; margin-top: 20px; }
+    .settings-status {
+      font-size: 12px; font-weight: 600; padding: 8px 12px;
+      border-radius: 8px; margin-bottom: 16px; display: none;
+    }
+    .settings-status.ok { display: block; background: rgba(74,222,128,.1); color: var(--accent2); border: 1px solid rgba(74,222,128,.3); }
+    .settings-status.err { display: block; background: rgba(239,68,68,.1); color: #ef4444; border: 1px solid rgba(239,68,68,.3); }
   </style>
 </head>
 <body>
@@ -655,6 +702,11 @@
       </svg>
       <input id="search" type="search" placeholder="Szukaj przepisu, składnika..." autocomplete="off" />
     </div>
+    <button class="settings-btn" id="settings-btn" title="Ustawienia oceniania">
+      <svg width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+    </button>
   </div>
 </header>
 
@@ -704,6 +756,42 @@
     </div>
   </main>
 
+</div>
+
+<!-- SETTINGS DIALOG -->
+<div class="settings-overlay" id="settings-overlay">
+  <div class="settings-dialog">
+    <h2>⚙️ Ustawienia oceniania</h2>
+    <p class="settings-desc">Token jest przechowywany tylko w Twojej przeglądarce (localStorage) i nigdy nie trafia do kodu.</p>
+    <div id="settings-status" class="settings-status"></div>
+    <div class="settings-field">
+      <label>GitHub Personal Access Token (scope: gist)</label>
+      <input id="settings-token" type="password" placeholder="ghp_…" autocomplete="off" spellcheck="false" />
+      <p class="field-hint">Wygeneruj na <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">github.com/settings/tokens</a> — zaznacz tylko zakres <b>gist</b>.</p>
+    </div>
+    <div class="settings-field">
+      <label>Gist ID <span style="font-weight:400;color:var(--text3)">(opcjonalne — uzupełnia się automatycznie)</span></label>
+      <input id="settings-gist" type="text" placeholder="np. a1b2c3d4e5f6…" autocomplete="off" spellcheck="false" />
+      <p class="field-hint">Jeśli ktoś inny już stworzył Gista — wklej jego ID żeby wszyscy pisali do tej samej bazy.</p>
+    </div>
+    <div class="settings-actions">
+      <button class="btn-primary" id="settings-save">Zapisz i połącz</button>
+      <button class="btn-ghost" id="settings-cancel">Anuluj</button>
+    </div>
+  </div>
+</div>
+
+<!-- NICK DIALOG -->
+<div class="nick-overlay" id="nick-overlay">
+  <div class="nick-dialog">
+    <h2>Jak masz na imię?</h2>
+    <p>Wpisz swój <b>unikalny nick</b> — będzie używany do zapisywania Twoich ocen. Jeśli nick już istnieje w bazie, zakładamy że to Ty wracasz.</p>
+    <input id="nick-input" type="text" placeholder="np. krzysiek" maxlength="30" autocomplete="off" spellcheck="false" />
+    <div class="nick-actions">
+      <button class="btn-primary" id="nick-confirm">Gotowe</button>
+      <button class="btn-ghost" id="nick-cancel">Anuluj</button>
+    </div>
+  </div>
 </div>
 
 <!-- MODAL -->
@@ -1122,9 +1210,12 @@ function getIllustration(recipe) {
 }
 
 // ── RATINGS ──────────────────────────────────────────────────────────────────
+// token i gistId są przechowywane w localStorage — nigdy w kodzie
 const RATINGS = {
-  token: '',  // wklej GitHub PAT (scope: gist) — NIE commituj tokena
-  gistId: '',               // uzupełniane automatycznie przy pierwszym zapisie
+  get token()  { return localStorage.getItem('rerespo-gh-token') || ''; },
+  set token(v) { if (v) localStorage.setItem('rerespo-gh-token', v); else localStorage.removeItem('rerespo-gh-token'); },
+  get gistId() { return localStorage.getItem('rerespo-gist-id') || ''; },
+  set gistId(v){ localStorage.setItem('rerespo-gist-id', v); },
   filename: 'rerespo-ratings.json'
 };
 
@@ -1536,19 +1627,69 @@ document.getElementById('nick-confirm').addEventListener('click', confirmNick);
 document.getElementById('nick-cancel').addEventListener('click', closeNickDialog);
 document.getElementById('nick-input').addEventListener('keydown', e => { if (e.key === 'Enter') confirmNick(); if (e.key === 'Escape') closeNickDialog(); });
 document.getElementById('nick-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeNickDialog(); });
-</script>
 
-<!-- NICK DIALOG -->
-<div class="nick-overlay" id="nick-overlay">
-  <div class="nick-dialog">
-    <h2>Jak masz na imię?</h2>
-    <p>Wpisz swój <b>unikalny nick</b> — będzie używany do zapisywania Twoich ocen. Jeśli nick już istnieje w bazie, zakładamy że to Ty wracasz.</p>
-    <input id="nick-input" type="text" placeholder="np. krzysiek" maxlength="30" autocomplete="off" spellcheck="false" />
-    <div class="nick-actions">
-      <button class="btn-primary" id="nick-confirm">Gotowe</button>
-      <button class="btn-ghost" id="nick-cancel">Anuluj</button>
-    </div>
-  </div>
-</div>
+// ── SETTINGS DIALOG ──────────────────────────────────────────────────────────
+function updateSettingsBtn() {
+  const btn = document.getElementById('settings-btn');
+  btn.classList.toggle('configured', !!RATINGS.token);
+}
+
+function openSettings() {
+  document.getElementById('settings-token').value = RATINGS.token;
+  document.getElementById('settings-gist').value = RATINGS.gistId;
+  document.getElementById('settings-status').className = 'settings-status';
+  document.getElementById('settings-overlay').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-overlay').classList.remove('open');
+}
+
+async function saveSettings() {
+  const token = document.getElementById('settings-token').value.trim();
+  const gistId = document.getElementById('settings-gist').value.trim();
+  const statusEl = document.getElementById('settings-status');
+
+  if (!token) {
+    statusEl.textContent = 'Wpisz token GitHub.';
+    statusEl.className = 'settings-status err';
+    return;
+  }
+
+  // verify token
+  statusEl.textContent = 'Sprawdzanie tokena…';
+  statusEl.className = 'settings-status ok';
+  try {
+    const res = await fetch('https://api.github.com/gists', {
+      headers: { Authorization: `token ${token}` }
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  } catch (e) {
+    statusEl.textContent = `Błąd: ${e.message} — sprawdź token.`;
+    statusEl.className = 'settings-status err';
+    return;
+  }
+
+  RATINGS.token = token;
+  if (gistId) RATINGS.gistId = gistId;
+
+  // reload ratings with new config
+  await fetchRatings();
+  render();
+
+  statusEl.textContent = '✓ Zapisano. Ocenianie działa!';
+  statusEl.className = 'settings-status ok';
+  updateSettingsBtn();
+  setTimeout(closeSettings, 1500);
+}
+
+document.getElementById('settings-btn').addEventListener('click', openSettings);
+document.getElementById('settings-save').addEventListener('click', saveSettings);
+document.getElementById('settings-cancel').addEventListener('click', closeSettings);
+document.getElementById('settings-overlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeSettings(); });
+document.getElementById('settings-token').addEventListener('keydown', e => { if (e.key === 'Enter') saveSettings(); });
+
+updateSettingsBtn();
+</script>
 </body>
 </html>
